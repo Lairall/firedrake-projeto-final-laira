@@ -88,5 +88,5 @@ v = TestFunction(V)
 # ============================================================
 
 p_r = Constant(1.0e7)  # 100 bar = 1e7 Pa
-p_k.assign(p_r)
-p.assign(p_r)
+p_k.assign(p_r)    
+p.assign(p_r)           
