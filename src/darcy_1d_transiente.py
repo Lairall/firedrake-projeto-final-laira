@@ -41,10 +41,32 @@ e a discretização temporal é feita via esquema implícito de Euler.
 """
 
 # ============================================================
-# Importação de bibliotecas
+# Importing libraries
 # ============================================================
 
 from firedrake import *
 import numpy as np
 import matplotlib.pyplot as plt
+
+# ============================================================
+# Mesh definition
+# ============================================================
+
+# One-dimensional domain [0, L]
+L = 50.0                 # domain length
+numel = 200              # number of elements
+x_left, x_right = 0.0, L
+
+mesh = IntervalMesh(numel, x_left, x_right)
+
+# ============================================================
+# Function space declaration
+# ============================================================
+
+degree = 1               # Polynomial degree of approximation (Lagrange polynomial)
+V = FunctionSpace(mesh, "CG", degree) # space where pressure will be solved
+
+# Auxiliary space for post-processing (projections)
+Vref = FunctionSpace(mesh, "CG", 1)
+
 
