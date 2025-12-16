@@ -69,4 +69,24 @@ V = FunctionSpace(mesh, "CG", degree) # space where pressure will be solved
 # Auxiliary space for post-processing (projections)
 Vref = FunctionSpace(mesh, "CG", 1)
 
+# ============================================================
+# Boundary conditions
+# ============================================================
 
+# Prescribed pressure at the inlet (x = 0)
+p_w = Constant(2.0e7)  # 200 bar = 2e7 Pa
+bc_left = DirichletBC(V, p_w, 1)
+bcs = [bc_left]
+
+# Unknown functions
+p = Function(V, name="Pressure")        # pressure at time n+1
+p_k = Function(V, name="Pressure_old")  # pressure at time n
+v = TestFunction(V)
+
+# ============================================================
+# Initial condition
+# ============================================================
+
+p_r = Constant(1.0e7)  # 100 bar = 1e7 Pa
+p_k.assign(p_r)
+p.assign(p_r)
