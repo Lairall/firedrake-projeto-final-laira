@@ -90,3 +90,15 @@ v = TestFunction(V)
 p_r = Constant(1.0e7)  # 100 bar = 1e7 Pa
 p_k.assign(p_r)    
 p.assign(p_r)           
+
+
+# ============================================================
+# Physical parameters of the model
+# ============================================================
+
+phi = Constant(0.15)        # porosity
+kappa = Constant(2.6647e-13)     # permeability [m^2]
+mu = Constant(0.94e-5)         # viscosity [Pa.s]  in a temperature of 50C
+
+# Source term (no sources)
+f = Constant(0.0)
