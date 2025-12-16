@@ -1,0 +1,10 @@
+# Configurações do VS Code
+.vscode/
+
+# Arquivos temporários do Python
+__pycache__/
+*.pyc
+
+# Resultados gerados automaticamente
+results/*.png
+results/*.pdf
