@@ -73,10 +73,18 @@ Vref = FunctionSpace(mesh, "CG", 1)
 # Boundary conditions
 # ============================================================
 
-# Prescribed pressure at the inlet (x = 0)
+# Prescribed pressures (Dirichlet BCs)
+
+# Injector well pressure at x = 0
 p_w = Constant(2.0e7)  # 200 bar = 2e7 Pa
 bc_left = DirichletBC(V, p_w, 1)
-bcs = [bc_left]
+
+# Reservoir pressure at x = L
+p_r = Constant(1.0e7)  # 100 bar = 1e7 Pa
+bc_right = DirichletBC(V, p_r, 2)
+
+# List of boundary conditions
+bcs = [bc_left, bc_right]
 
 # Unknown functions
 p = Function(V, name="Pressure")        # pressure at time n+1
@@ -87,9 +95,8 @@ v = TestFunction(V)
 # Initial condition
 # ============================================================
 
-p_r = Constant(1.0e7)  # 100 bar = 1e7 Pa
-p_k.assign(p_r)         # pressão antiga
-p.assign(p_r)           # pressão atual
+p_k.assign(p_r)   # initial pressure in the reservoir
+p.assign(p_r)
 
 
 # ============================================================
@@ -142,7 +149,22 @@ for n in range(num_steps):
     t += float(dt)
 
     solve(F == 0, p, bcs=bcs, solver_parameters=solver_parameters)
+    
+    # Numerical checks
+    p_array = p.dat.data_ro
+    p_mid = p.at(L/2)
+
+    print(f"Time step {n+1}/{num_steps}, time = {t/86400:.2f} days")
+    print(f"  p_min = {p_array.min():.3e} Pa, p_max = {p_array.max():.3e} Pa")
+    print(f"  p(x=L/2) = {p_mid:.3e} Pa")
+    
+    # p_array = p.dat.data_ro
+    # print(f"Time step {n+1}/{num_steps}, time = {t/86400:.2f} days")
+    # print(f"  p_min = {p_array.min():.3e} Pa, p_max = {p_array.max():.3e} Pa")
 
     # Update solution for next time step
     p_k.assign(p)
+
+# ============================================================
+
 
