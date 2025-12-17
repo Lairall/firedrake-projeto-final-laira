@@ -64,7 +64,7 @@ mesh = IntervalMesh(numel, x_left, x_right)
 # ============================================================
 
 degree = 1               # Polynomial degree of approximation (Lagrange polynomial)
-V = FunctionSpace(mesh, "CG", degree) # space where pressure will be solved
+V = FunctionSpace(mesh, "CG", degree) # V_h space where pressure will be solved
 
 # Auxiliary space for post-processing (projections)
 Vref = FunctionSpace(mesh, "CG", 1)
@@ -88,8 +88,8 @@ v = TestFunction(V)
 # ============================================================
 
 p_r = Constant(1.0e7)  # 100 bar = 1e7 Pa
-p_k.assign(p_r)    
-p.assign(p_r)           
+p_k.assign(p_r)         # pressão antiga
+p.assign(p_r)           # pressão atual
 
 
 # ============================================================
@@ -102,3 +102,47 @@ mu = Constant(0.94e-5)         # viscosity [Pa.s]  in a temperature of 50C
 
 # Source term (no sources)
 f = Constant(0.0)
+
+# ============================================================
+# Time discretization parameters
+# ============================================================
+
+T_total = 4.0e7        # total simulation time [s] (~460 days)
+num_steps = 400        # number of time steps
+dt = Constant(T_total / num_steps)
+
+# ============================================================
+# Variational formulation (nonlinear residual)
+# ============================================================
+
+F = (
+    phi * (p - p_k) / dt * v * dx
+    + (kappa / mu) * p * dot(grad(p), grad(v)) * dx
+    - f * v * dx     # f = 0
+)
+
+# ============================================================
+# Nonlinear solver parameters (SNES)
+# ============================================================
+
+solver_parameters = {
+    "snes_type": "newtonls",   # Método de Newton com line search
+    "snes_rtol": 1e-8,          # Precisão relativa do resíduo
+    "snes_atol": 1e-10,         # Precisão absoluta do resíduo
+    "ksp_type": "preonly",      # Usar apenas o pré-condicionador
+    "pc_type": "lu"             # Fatoração LU direta
+}
+
+# ============================================================
+# Time loop
+# ============================================================
+
+t = 0.0
+for n in range(num_steps):
+    t += float(dt)
+
+    solve(F == 0, p, bcs=bcs, solver_parameters=solver_parameters)
+
+    # Update solution for next time step
+    p_k.assign(p)
+
