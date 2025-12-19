@@ -1,48 +1,10 @@
-"""
-Trabalho Final — Disciplina: GA 033 - Elementos Finitos
-Tema: Escoamento monofásico compressível de gás ideal em meio poroso (1D)
-Formulação variacional com Firedrake
-
-Descrição do problema: (transiente)
-----------------------
-Resolve-se o problema transiente de escoamento monofásico de um gás ideal
-em um meio poroso unidimensional, representando um reservatório de comprimento L.
-
-Admite-se que:
-- o meio é rígido (porosidade constante),
-- o gás é ideal (fator de compressibilidade Z = 1),
-- não há termo fonte,
-- efeitos gravitacionais são desprezados.
-
-A equação governante considerada (Equação 5 do enunciado do projeto) é:
-
-    φ ∂p/∂t = (k/μ) ∂/∂x ( p ∂p/∂x )
-
-onde:
-    p   = pressão
-    φ   = porosidade
-    k   = permeabilidade
-    μ   = viscosidade do fluido
-
-Condições de contorno:
-    p = p_w  na fronteira do poço injetor (x = 0)
-
-Condição inicial:
-    p(x, 0) = p_r,  ∀ x ∈ Ω
-
-A discretização espacial é realizada pelo Método dos Elementos Finitos
-utilizando elementos de Lagrange contínuos (CG),
-e a discretização temporal é feita via esquema implícito de Euler.
-"""
-
-# Importing libraries
 from firedrake import *
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Mesh definition
 numel = 200
-L = 50.0
+L = 10.0
 x_left, x_right = 0.0, L
 mesh = IntervalMesh(numel, x_left, x_right)
 
@@ -51,24 +13,21 @@ degree = 1  # Polynomial degree of approximation
 V = FunctionSpace(mesh, "CG", degree)
 Vref = FunctionSpace(mesh, "CG", 1)
 
-# Boundary condition (Dirichlet) and Initial condition
-boundary_value_left = 2e7
+# Essential boundary conditions
+boundary_value_left = 5e5
 bc_left = DirichletBC(V, boundary_value_left, 1)  # Boundary condition in 1 marked bounds (left)
 bcs = [bc_left]
-
-ic = Constant(1e7)
-
 
 # Trial and Test functions
 p = Function(V)
 p_k = Function(V)
 v = TestFunction(V)
 
-# Physical parameters
-phi = Constant(0.15)        # porosity
-kappa = Constant(2.6647e-13)     # permeability [m^2]
-mu = Constant(0.94e-5)         # viscosity [Pa.s]  in a temperature of 50C
-f = Constant(0.0)            # source term  
+# Source term
+f = Constant(0.0)
+
+# Initial condition
+ic = Constant(3e7)
 
 # Time parameters
 T_total = 4.147e7  # 480 days
@@ -78,18 +37,37 @@ dt = T_total / 500.
 p_k.assign(ic)
 p.assign(ic)
 
+
 # Compressibility factor fitted from PR-EoS in terms of pressure
 def Z(p):
-    return 1.0
+    zcoef = np.zeros(10)
+    zcoef[0] = 9.99921144125617722409060661448165774345397949218750e-01
+    zcoef[1] = -1.19919829040115086206268166821135856547897446944262e-08
+    zcoef[2] = 2.95290097079410864772724180594317997860333752145959e-16
+    zcoef[3] = 9.42231835327529024372629441226386885009463920848079e-24
+    zcoef[4] = -2.46929568577390678055712987160325876321312377285599e-31
+    zcoef[5] = -7.40016953399249021667823040632784926032215181166411e-39
+    zcoef[6] = 4.21756086831535086775256556143298098377555103824524e-46
+    zcoef[7] = -7.90995787006734393072263251251053413138923617742665e-54
+    zcoef[8] = 6.96584174374744927048653426883823314263335677413527e-62
+    zcoef[9] = -2.42926517319393920651606665298459161434867679132808e-70
+
+    Z_value = 0.0
+    for i in range(len(zcoef)):
+        Z_value += zcoef[i] * p ** i
+
+    return Z_value
+
 
 # Non-linear pressure term
 def fp(p):
     return p / Z(p)
 
+
 # Model parameters
-phi = Constant(0.15)  # Porosity
-kappa = Constant(1.0e-18)  # Permeability
-mu = Constant(0.94e-5)  # Methane's viscosity
+phi = Constant(0.05)  # Porosity
+kappa = Constant(1e-18)  # Permeability
+mu = Constant(1e-5)  # Methane's viscosity
 
 # Residual variational formulation
 F = phi * inner((fp(p) - fp(p_k)) / dt, v) * dx + (kappa / mu) * inner(fp(p) * grad(p), grad(v)) * dx
@@ -164,5 +142,5 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 
 # Displaying the plot
 plt.tight_layout()
-plt.savefig('compressible-flow-transiente.png')
+plt.savefig('compressible-flow.png')
 #plt.show()
