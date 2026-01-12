@@ -35,6 +35,10 @@ utilizando elementos de Lagrange contínuos (CG),
 e a discretização temporal é feita via esquema implícito de Euler.
 """
 
+"""
+TESTANDO COM 2 COND DE CONTORNO DIRICHLET NO PROBLEMA TRANSIENTE
+"""
+
 # Importing libraries
 from firedrake import *
 import numpy as np
@@ -54,7 +58,11 @@ Vref = FunctionSpace(mesh, "CG", 1)
 # Boundary condition (Dirichlet) and Initial condition
 boundary_value_left = 2e7
 bc_left = DirichletBC(V, boundary_value_left, 1)  # Boundary condition in 1 marked bounds (left)
-bcs = [bc_left]
+# bcs = [bc_left]
+boundary_value_right = 1e7
+bc_right = DirichletBC(V, boundary_value_right, 2)
+bcs = [bc_left, bc_right]
+
 
 ic = Constant(1e7)
 
@@ -66,8 +74,7 @@ v = TestFunction(V)
 
 # Physical parameters
 phi = Constant(0.15)        # porosity
-# kappa = Constant(2.6647e-13)     # permeability [m^2]
-kappa = Constant(1.0e-18)  # Permeability
+kappa = Constant(2.6647e-13)     # permeability [m^2]
 mu = Constant(0.94e-5)         # viscosity [Pa.s]  in a temperature of 50C
 f = Constant(0.0)            # source term  
 
@@ -94,7 +101,7 @@ F -= f * v * dx
 # Solver parameters
 solver_parameters = {
     'mat_type': 'aij',
-    'snes_type': 'newtonls',
+    'snes_tyoe': 'newtonls',
     'pc_type': 'lu'
 }
 
@@ -160,5 +167,5 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 
 # Displaying the plot
 plt.tight_layout()
-plt.savefig('compressible-flow-transiente.png')
+plt.savefig('compressible-flow-transiente-2dirichlet.png')
 #plt.show()
