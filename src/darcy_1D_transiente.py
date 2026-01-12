@@ -14,7 +14,7 @@ Admite-se que:
 - não há termo fonte,
 - efeitos gravitacionais são desprezados.
 
-A equação governante considerada (Equação 5 do enunciado do projeto) é:
+A equação governante considerada é:
 
     φ ∂p/∂t = (k/μ) ∂/∂x ( p ∂p/∂x )
 

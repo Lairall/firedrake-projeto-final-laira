@@ -14,7 +14,7 @@ Admite-se que:
 - não há termo fonte,
 - efeitos gravitacionais são desprezados.
 
-A equação governante considerada (Equação 5 do enunciado do projeto) é:
+A equação governante considerada é:
 
     (k/μ) ∂/∂x ( p ∂p/∂x ) = 0
 
@@ -85,10 +85,23 @@ solver_parameters = {
 # Solve
 solve(F == 0, p, bcs=bcs, solver_parameters=solver_parameters)
 
-# Plotting
+# solution
 x_values = mesh.coordinates.dat.data_ro
 p_values = p.dat.data_ro / 1e3  # kPa
 
+# Analytical solution (steady state)
+pw = float(p_left)
+pr = float(p_right)
+
+p_analytical = np.sqrt(
+    pw**2 + (pr**2 - pw**2) * x_values / L
+)
+
+p_analytical = p_analytical / 1e3  # kPa
+
+
+# Plotting
+"""
 plt.figure(dpi=300, figsize=(8, 6))
 plt.plot(x_values, p_values, label="Steady state")
 plt.xlabel(r"$x$ [m]")
@@ -99,3 +112,32 @@ plt.legend()
 plt.tight_layout()
 plt.savefig("compressible-flow-steady-2dirichlet.png")
 # plt.show()
+"""
+
+plt.figure(dpi=300, figsize=(8, 6))
+
+plt.plot(
+    x_values,
+    p_values,
+    "o",
+    markersize=3,
+    label="FEM (CG1)"
+)
+
+plt.plot(
+    x_values,
+    p_analytical,
+    "-",
+    linewidth=2,
+    label="Solução analítica"
+)
+
+plt.xlabel(r"$x$ [m]")
+plt.ylabel("Pressure [kPa]")
+plt.xlim(x_values.min(), x_values.max())
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.savefig("comparison_fem_analytical_steady.png")
+# plt.show()
+

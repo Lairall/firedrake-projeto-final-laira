@@ -142,5 +142,5 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 
 # Displaying the plot
 plt.tight_layout()
-plt.savefig('compressible-flow.png')
+plt.savefig('diego-compressible-flow.png')
 #plt.show()
