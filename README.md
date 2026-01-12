@@ -48,6 +48,9 @@ compressible-flow-transiente.png
 ---
 
 ## Problema Estacionário
+Condições de contorno:
+- \( p(0,t) = p_w \)
+- \( p(L,t) = p_r \)
 
 Saída:
 compressible-flow-steady-2dirichlet.png

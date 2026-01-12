@@ -86,11 +86,6 @@ def Z(p):
 def fp(p):
     return p / Z(p)
 
-# Model parameters
-phi = Constant(0.15)  # Porosity
-kappa = Constant(1.0e-18)  # Permeability
-mu = Constant(0.94e-5)  # Methane's viscosity
-
 # Residual variational formulation
 F = phi * inner((fp(p) - fp(p_k)) / dt, v) * dx + (kappa / mu) * inner(fp(p) * grad(p), grad(v)) * dx
 F -= f * v * dx
