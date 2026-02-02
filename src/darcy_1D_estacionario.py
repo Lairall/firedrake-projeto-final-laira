@@ -59,7 +59,7 @@ p = Function(V, name="Pressure")
 v = TestFunction(V)
 
 # Initial guess
-p.assign(1.5e7)
+p.assign(1.5e7)  # Define um valor inicial para o método de Newton começar a iteração.
 
 # Physical parameters
 kappa = Constant(1.0e-18)
@@ -77,17 +77,70 @@ F = (kappa / mu) * inner(fp(p) * grad(p), grad(v)) * dx
 
 # Solver parameters
 solver_parameters = {
-    "mat_type": "aij",
-    "snes_type": "newtonls",
-    "pc_type": "lu"
+    "mat_type": "aij",  # matriz esparsa padrão
+    "snes_type": "newtonls",   # Método de Newton com linha de busca
+    "pc_type": "lu"  # resolve o sistema linear com fatoração LU
 }
 
 # Solve
 solve(F == 0, p, bcs=bcs, solver_parameters=solver_parameters)
 
+
+# Post-processing 
+V_u = FunctionSpace(mesh, "DG", 0) # Function space for velocity
+u = Function(V_u, name="Darcy velocity")
+u_expr = -(kappa / mu) * p.dx(0)
+u.project(u_expr)
+
+u_values = u.dat.data_ro.copy() # Pega os valores da velocidade de Darcy
+# x_cells = mesh.cell_centers().dat.data_ro # Pega os valores das coordenadas
+# Coordenada espacial projetada no espaço DG0 (centro das células)
+x = SpatialCoordinate(mesh)
+x_cell = Function(V_u)
+x_cell.project(x[0])
+
+x_cells = x_cell.dat.data_ro.copy()
+
+
+"""
+# Plot da velocidade numérica
+plt.figure(dpi=300, figsize=(8, 6))
+plt.step(
+    x_cells,
+    u_values,
+    where="mid",
+    linewidth=2,
+    label="Velocidade Darcy (FEM)"
+)
+
+plt.xlabel(r"$x$ [m]")
+plt.ylabel(r"$u$ [m/s]")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.savefig("velocity_fem_steady.png")
+"""
+
+# =========================
+# Velocidade analítica
+# =========================
+
+# Parâmetros
+pw = float(p_left)
+pr = float(p_right)
+
+a = (pr**2 - pw**2) / L
+
+# Pressão analítica nos centros das células
+p_analytical_cells = np.sqrt(pw**2 + a * x_cells)
+
+# Velocidade analítica
+u_analytical = -(float(kappa) / float(mu)) * a / (2.0 * p_analytical_cells)
+
+
 # solution
-x_values = mesh.coordinates.dat.data_ro
-p_values = p.dat.data_ro / 1e3  # kPa
+x_values = mesh.coordinates.dat.data_ro # Pega os valores das coordenadas dos nós da malha.
+p_values = p.dat.data_ro / 1e3  # Pega os valores da pressão numérica e converte de Pa para kPa.
 
 # Analytical solution (steady state)
 pw = float(p_left)
@@ -98,6 +151,32 @@ p_analytical = np.sqrt(
 )
 
 p_analytical = p_analytical / 1e3  # kPa
+
+plt.figure(dpi=300, figsize=(8, 6))
+
+plt.step(
+    x_cells,
+    u_values,
+    where="mid",
+    linewidth=2,
+    label="Velocidade Darcy (FEM)"
+)
+
+plt.plot(
+    x_cells,
+    u_analytical,
+    "--",
+    linewidth=2,
+    label="Velocidade Darcy (Analítica)"
+)
+
+plt.xlabel(r"$x$ [m]")
+plt.ylabel(r"$u$ [m/s]")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.savefig("velocity_comparison_steady.png")
+
 
 
 # Plotting
