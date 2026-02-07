@@ -26,6 +26,7 @@ onde:
 
 Condições de contorno:
     p = p_w  na fronteira do poço injetor (x = 0)
+    p = p_r  na fronteira do reservatório (x = L)
 
 A discretização espacial é realizada pelo Método dos Elementos Finitos
 utilizando elementos de Lagrange contínuos (CG), 
@@ -46,8 +47,12 @@ V = FunctionSpace(mesh, "CG", degree)
 
 # Boundary conditions
 p_left = Constant(2.0e7)   # 200 bar
+p_right = Constant(1.0e7)  # 100 bar
+
 bc_left = DirichletBC(V, p_left, 1)
-bcs = [bc_left]
+bc_right = DirichletBC(V, p_right, 2)
+
+bcs = [bc_left, bc_right]
 
 # Unknown and test function
 p = Function(V, name="Pressure")
@@ -80,16 +85,15 @@ solver_parameters = {
 # Solve
 solve(F == 0, p, bcs=bcs, solver_parameters=solver_parameters)
 
-# =========================
+
 # Post-processing 
-# =========================
 V_u = FunctionSpace(mesh, "DG", 0) # Function space for velocity
 u = Function(V_u, name="Darcy velocity")
 u_expr = -(kappa / mu) * p.dx(0)
 u.project(u_expr)
 
 u_values = u.dat.data_ro.copy() # Pega os valores da velocidade de Darcy
-x = SpatialCoordinate(mesh) 
+x = SpatialCoordinate(mesh)
 x_cell = Function(V_u)
 x_cell.project(x[0])
 
@@ -112,7 +116,7 @@ plt.ylabel(r"$u$ [m/s]")
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DN-velocity.png")
+plt.savefig("steady-DD-velocity.png")
 # """
 
 # =========================
@@ -121,19 +125,35 @@ plt.savefig("steady-DN-velocity.png")
 
 # Parâmetros
 pw = float(p_left)
+pr = float(p_right)
+
+a = (pr**2 - pw**2) / L
+
+# Pressão analítica nos centros das células
+p_analytical_cells = np.sqrt(pw**2 + a * x_cells)
+
+# Velocidade analítica
+u_analytical = -(float(kappa) / float(mu)) * a / (2.0 * p_analytical_cells)
+
 
 # solution
-x_values = mesh.coordinates.dat.data_ro
-p_analytical = np.ones_like(x_values) * pw / 1e3  # kPa
+x_values = mesh.coordinates.dat.data_ro # Pega os valores das coordenadas dos nós da malha.
+p_values = p.dat.data_ro / 1e3  # Pega os valores da pressão numérica e converte de Pa para kPa.
 
-u_analytical = np.zeros_like(x_cells) 
+# Analytical solution (steady state)
+pw = float(p_left)
+pr = float(p_right)
 
-p_values = p.dat.data_ro / 1e3  # kPa
+p_analytical = np.sqrt(
+    pw**2 + (pr**2 - pw**2) * x_values / L
+)
 
+p_analytical = p_analytical / 1e3  # kPa
 
 # =========================
-# Plot velocidade
+# Plotting
 # =========================
+
 plt.figure(dpi=300, figsize=(8, 6))
 
 plt.step(
@@ -157,13 +177,9 @@ plt.ylabel(r"$u$ [m/s]")
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DN-velocity-comparison.png")
+plt.savefig("steady-DD-velocity-comparison.png")
 
 
-
-# =========================
-# Plot pressão
-# =========================
 # """
 plt.figure(dpi=300, figsize=(8, 6))
 plt.plot(x_values, p_values, label="Steady state")
@@ -173,7 +189,7 @@ plt.xlim(x_values.min(), x_values.max())
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DN-pressure.png")
+plt.savefig("steady-DD-pressure.png")
 # plt.show()
 # """
 
@@ -201,6 +217,6 @@ plt.xlim(x_values.min(), x_values.max())
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DN-pressure-comparison.png")
+plt.savefig("steady-DD-pressure-comparison.png")
 # plt.show()
 

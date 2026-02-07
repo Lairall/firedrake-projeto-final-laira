@@ -160,5 +160,5 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 
 # Displaying the plot
 plt.tight_layout()
-plt.savefig('compressible-flow-transiente.png')
+plt.savefig('transient-DN-pressure.png')
 #plt.show()
