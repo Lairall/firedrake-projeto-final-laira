@@ -111,6 +111,7 @@ plt.xlabel(r"$x$ [m]")
 plt.ylabel(r"$u$ [m/s]")
 plt.grid(True)
 plt.legend()
+plt.ticklabel_format(style='plain', axis='y')
 plt.tight_layout()
 plt.savefig("steady-DN-velocity.png")
 # """
@@ -124,11 +125,11 @@ pw = float(p_left)
 
 # solution
 x_values = mesh.coordinates.dat.data_ro
-p_analytical = np.ones_like(x_values) * pw / 1e3  # kPa
+p_analytical = np.ones_like(x_values) * pw / 1e6  # MPa
 
 u_analytical = np.zeros_like(x_cells) 
 
-p_values = p.dat.data_ro / 1e3  # kPa
+p_values = p.dat.data_ro / 1e6  # MPa
 
 
 # =========================
@@ -136,28 +137,23 @@ p_values = p.dat.data_ro / 1e3  # kPa
 # =========================
 plt.figure(dpi=300, figsize=(8, 6))
 
-plt.step(
-    x_cells,
-    u_values,
-    where="mid",
-    linewidth=2,
-    label="Velocidade Darcy (FEM)"
-)
-
-plt.plot(
-    x_cells,
-    u_analytical,
-    "--",
-    linewidth=2,
-    label="Velocidade Darcy (Analítica)"
-)
+plt.step(x_cells, u_values, where="mid", linewidth=2, label="Velocidade Darcy (FEM)")
+plt.plot(x_cells, u_analytical, "--", linewidth=2, label="Velocidade Darcy (Analítica)")
 
 plt.xlabel(r"$x$ [m]")
 plt.ylabel(r"$u$ [m/s]")
+plt.xlim(x_cells.min(), x_cells.max())
+
+# força notação científica elegante
+ax = plt.gca()
+ax.ticklabel_format(axis='y', style='sci', scilimits=(-2,2))
+ax.yaxis.get_offset_text().set_fontsize(10)
+
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
 plt.savefig("steady-DN-velocity-comparison.png")
+
 
 
 
@@ -166,41 +162,22 @@ plt.savefig("steady-DN-velocity-comparison.png")
 # =========================
 # """
 plt.figure(dpi=300, figsize=(8, 6))
-plt.plot(x_values, p_values, label="Steady state")
-plt.xlabel(r"$x$ [m]")
-plt.ylabel("Pressure [kPa]")
-plt.xlim(x_values.min(), x_values.max())
-plt.grid(True)
-plt.legend()
-plt.tight_layout()
-plt.savefig("steady-DN-pressure.png")
-# plt.show()
-# """
 
-plt.figure(dpi=300, figsize=(8, 6))
-
-plt.plot(
-    x_values,
-    p_values,
-    "o",
-    markersize=3,
-    label="FEM (CG1)"
-)
-
-plt.plot(
-    x_values,
-    p_analytical,
-    "-",
-    linewidth=2,
-    label="Solução analítica"
-)
+plt.plot(x_values, p_values, "o", markersize=3, label="FEM (CG1)")
+plt.plot(x_values, p_analytical, "-", linewidth=2, label="Solução analítica")
 
 plt.xlabel(r"$x$ [m]")
-plt.ylabel("Pressure [kPa]")
+plt.ylabel("Pressure [MPa]")
 plt.xlim(x_values.min(), x_values.max())
+
+# ESCALA BOA
+plt.ylim(19.9, 20.1)  # ajusta para perto de 20 MPa
+
+# REMOVE offset tipo +2e1
+ax = plt.gca()
+ax.ticklabel_format(useOffset=False, style='plain')
+
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
 plt.savefig("steady-DN-pressure-comparison.png")
-# plt.show()
-

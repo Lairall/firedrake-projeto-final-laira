@@ -104,6 +104,20 @@ step = 0
 # diego: x_values = mesh.coordinates.vector().dat.data
 x_values = mesh.coordinates.dat.data_ro # Laira
 
+# =========================
+# Velocity post-processing setup
+# =========================
+V_u = FunctionSpace(mesh, "DG", 0)   # velocidade por célula (constante por elemento)
+u = Function(V_u, name="Darcy velocity")
+
+x = SpatialCoordinate(mesh)
+x_cell = Function(V_u)
+x_cell.project(x[0])
+x_cells = x_cell.dat.data_ro.copy()
+
+u_time_values = []   # aqui que vai ser guardado a velocidade em cada tempo
+
+
 sol_values = []
 p_values_deg1 = []
 psol_deg1 = Function(Vref)
@@ -127,11 +141,22 @@ while t <= T_total:
     psol_deg1.project(p)
     p_vec_deg1 = psol_deg1.dat.data_ro.copy()
     p_values_deg1.append(p_vec_deg1)
+
+    # Darcy velocity at current time
+    u_expr = -(kappa / mu) * p.dx(0)
+    u.project(u_expr)
+
+    u_vec = u.dat.data_ro.copy()
+    u_time_values.append(u_vec)
+
+
     p_k.assign(p)
 
     t += dt
 
-# *** Plotting ***
+# =========================
+# Plotting pressure results
+# =========================
 
 # Setting up the figure object
 fig = plt.figure(dpi=300, figsize=(8, 6))
@@ -162,3 +187,28 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 plt.tight_layout()
 plt.savefig('transient-DN-pressure.png')
 #plt.show()
+
+
+# =========================
+# Plot da velocidade de Darcy 
+# =========================
+plt.figure(dpi=300, figsize=(8, 6))
+
+for i in steps_to_plot:
+    plt.step(
+        x_cells,
+        u_time_values[i-1],
+        where="mid",
+        linewidth=2,
+        label=('Day %i' % (i))
+    )
+
+plt.xlabel(r'$x$ [m]')
+plt.ylabel(r'$u$ [m/s]')
+plt.xlim(x_cells.min(), x_cells.max())
+plt.grid(True)
+plt.legend()
+plt.ticklabel_format(style='plain', axis='y')
+plt.tight_layout()
+plt.savefig('transient-DN-velocity.png')
+# plt.show()
