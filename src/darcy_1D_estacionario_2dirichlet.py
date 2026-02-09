@@ -116,7 +116,7 @@ plt.ylabel(r"$u$ [m/s]")
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DD-velocity.png")
+plt.savefig("src/DD/steady-DD-velocity.png")
 # """
 
 # =========================
@@ -177,7 +177,7 @@ plt.ylabel(r"$u$ [m/s]")
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DD-velocity-comparison.png")
+plt.savefig("src/DD/steady-DD-velocity-comparison.png")
 
 
 # """
@@ -189,7 +189,7 @@ plt.xlim(x_values.min(), x_values.max())
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DD-pressure.png")
+plt.savefig("src/DD/steady-DD-pressure.png")
 # plt.show()
 # """
 
@@ -217,6 +217,6 @@ plt.xlim(x_values.min(), x_values.max())
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("steady-DD-pressure-comparison.png")
+plt.savefig("src/DD/steady-DD-pressure-comparison.png")
 # plt.show()
 

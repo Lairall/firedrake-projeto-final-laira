@@ -194,7 +194,7 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 
 # Displaying the plot
 plt.tight_layout()
-plt.savefig('transient-DD-pressure.png')
+plt.savefig('src/DD/transient-DD-pressure.png')
 #plt.show()
 
 
@@ -215,4 +215,4 @@ plt.ylabel(r"Darcy velocity [m/s]")
 plt.grid(True)
 plt.legend()
 plt.tight_layout()
-plt.savefig("transient-DD-velocity.png")
+plt.savefig("src/DD/transient-DD-velocity.png")

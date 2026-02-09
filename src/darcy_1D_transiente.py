@@ -185,7 +185,7 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 
 # Displaying the plot
 plt.tight_layout()
-plt.savefig('transient-DN-pressure.png')
+plt.savefig('src/DN/transient-DN-pressure.png')
 #plt.show()
 
 
@@ -210,5 +210,5 @@ plt.grid(True)
 plt.legend()
 plt.ticklabel_format(style='plain', axis='y')
 plt.tight_layout()
-plt.savefig('transient-DN-velocity.png')
+plt.savefig('src/DN/transient-DN-velocity.png')
 # plt.show()
