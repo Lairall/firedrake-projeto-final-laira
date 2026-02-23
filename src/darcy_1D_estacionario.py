@@ -57,7 +57,8 @@ v = TestFunction(V)
 p.assign(1.5e7)  # Define um valor inicial para o método de Newton começar a iteração.
 
 # Physical parameters
-kappa = Constant(1.0e-18)
+# kappa = Constant(1.0e-18)
+kappa = Constant(1.0e-16)   # =0.0101325 mD TESTE (!!!)
 mu = Constant(0.94e-5)
 
 # Compressibility (gás ideal)

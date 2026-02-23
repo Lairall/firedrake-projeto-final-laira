@@ -46,8 +46,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Mesh definition
-numel = 200
-L = 50.0
+numel = 100 # mudei de 200 para 100 (!!!)
+L = 200.0   # alterado de 50 para 200m para ver melhor a evolução da pressão
 x_left, x_right = 0.0, L
 mesh = IntervalMesh(numel, x_left, x_right)
 
@@ -75,15 +75,25 @@ v = TestFunction(V)
 # Physical parameters
 phi = Constant(0.15)        # porosity
 # kappa = Constant(2.6647e-13)     # permeability [m^2]
-kappa = Constant(1.0e-18)
+# kappa = Constant(1.0e-18)
+kappa = Constant(1.0e-16)   # =0.0101325 mD TESTE (!!!)
 mu = Constant(0.94e-5)         # viscosity [Pa.s]  in a temperature of 50C
 f = Constant(0.0)            # source term  
 
+# ------------------
 # Time parameters
 # T_total = 4.147e7  # 480 days
 # dt = T_total / 500.
-T_total = 2 * 24 * 3600   # 2 dias em segundos
-dt = T_total / 200        # passos menores para ver a evolução
+
+# T_total = 2 * 24 * 3600   # 2 dias em segundos
+# dt = T_total / 200        # passos menores para ver a evolução
+
+# T_total = 30 * 24 * 3600  # 30 dias
+# dt = T_total / 200
+
+T_total = 180 * 24 * 3600  # 120 dias
+dt = T_total / 200
+# ------------------
 
 # Assigning the IC
 p_k.assign(ic)
@@ -104,7 +114,7 @@ F -= f * v * dx
 # Solver parameters
 solver_parameters = {
     'mat_type': 'aij',
-    'snes_tyoe': 'newtonls',
+    'snes_type': 'newtonls',
     'pc_type': 'lu'
 }
 
@@ -174,7 +184,7 @@ steps_to_plot = [1, 5, 10, 20, 50, 100, 200]
 
 
 for i in steps_to_plot:
-    ax.plot(x_values, p_values_deg1[i-1] / 1e3, label=('Day %i' % (i)))
+    ax.plot(x_values, p_values_deg1[i-1] / 1e3, label=('Time step %i' % (i)))
 
 # Getting and setting the legend
 box = ax.get_position()

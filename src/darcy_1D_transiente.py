@@ -66,10 +66,14 @@ v = TestFunction(V)
 
 # Physical parameters
 phi = Constant(0.15)        # porosity
-# kappa = Constant(2.6647e-13)     # permeability [m^2]
-kappa = Constant(1.0e-18)  # Permeability
 mu = Constant(0.94e-5)         # viscosity [Pa.s]  in a temperature of 50C
 f = Constant(0.0)            # source term  
+# kappa = Constant(2.6647e-13)     # =270mD permeability [m^2]
+# kappa = Constant(1.0e-18)    # =0.0101325 mD
+kappa = Constant(1.0e-16)    # =0.0101325 mD TESTE
+# kappa = Constant(1.0e-15)    # = 1.01325 mD mD TESTE
+
+
 
 # Time parameters
 T_total = 4.147e7  # 480 days
@@ -185,7 +189,7 @@ plt.grid(False, linestyle='--', linewidth=0.1, which='minor')
 
 # Displaying the plot
 plt.tight_layout()
-plt.savefig('src/DN/transient-DN-pressure.png')
+plt.savefig('src/DN/TESTE-transient-DN-pressure.png')
 #plt.show()
 
 
